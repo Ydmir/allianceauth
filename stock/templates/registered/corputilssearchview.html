@@ -24,6 +24,7 @@
                     <tr>
                         <th class="text-center">Character</th>
                         <th class="text-center">Main Character</th>
+                        <th class="text-center">Location</th>
                     </tr>
                     {% for member in members %}
                         <tr {% if  not member.api_registered%} bgcolor="#DD5500" {% endif %} >
@@ -35,6 +36,7 @@
                                 No API registered!
                             {% endif %}
                             </td>
+                            <td class="text-center">{{ member.location }}</td>
                         </tr>
                     {% endfor %}
                 </table>

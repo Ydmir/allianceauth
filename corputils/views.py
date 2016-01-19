@@ -9,8 +9,10 @@ from collections import namedtuple
 
 from authentication.managers import AuthServicesInfoManager
 from services.managers.eve_api_manager import EveApiManager
+from services.managers.eve_api_manager import EveCrestManager
 from eveonline.models import EveCorporationInfo
 from eveonline.models import EveCharacter
+from eveonline.models import EveApiKeyPair
 from authentication.models import AuthServicesInfo
 from forms import CorputilsSearchForm
 
@@ -34,13 +36,19 @@ def corp_member_view(request):
         member_list = EveApiManager.get_corp_membertracking()
         characters_with_api = {}
         characters_without_api = {}
+
+        Character = namedtuple('Character', ['name','main','location'])
+
         for char_id, member_data in member_list.items():
             try:
                 char = EveCharacter.objects.get(character_id=char_id)
                 user = char.user
                 mainid = int(AuthServicesInfoManager.get_auth_service_info(user=user).main_char_id)
                 mainname = EveCharacter.objects.get(character_id=mainid).character_name
-                characters_with_api.setdefault(mainname,[]).append(char.character_name)
+                characters_with_api.setdefault(mainname,[]).append(Character(name=member_data["name"],
+                                                                             main=mainname,
+                                                                             location=member_data["location"]["name"])
+                                                                   )
             except EveCharacter.DoesNotExist:
                 characters_without_api.setdefault(member_data["name"],[]).append(member_data["name"])
 
@@ -71,7 +79,7 @@ def corputils_search(request):
 
             member_list = EveApiManager.get_corp_membertracking()
 
-            Member = namedtuple('Member', ['name', 'main', 'api_registered'])
+            Member = namedtuple('Member', ['name', 'location', 'main', 'api_registered'])
 
             members = []
             for memberid, member_data in member_list.items():
@@ -85,7 +93,7 @@ def corputils_search(request):
                     except EveCharacter.DoesNotExist:
                         api_registered = False
                         mainname = ""
-                    members.append(Member(name=member_data["name"], main=mainname, api_registered=api_registered))
+                    members.append(Member(name=member_data["name"], location=member_data["location"]["name"], main=mainname, api_registered=api_registered))
 
 
             logger.info("Found %s members for user %s matching search string %s" % (len(members), request.user, searchstring))
@@ -103,4 +111,47 @@ def corputils_search(request):
     else:
         logger.debug("Returning empty search form for user %s" % request.user)
         return HttpResponseRedirect("/corputils/")
+
+@login_required
+@permission_required('auth.corp_stats')
+def ship_view(request):
+    logger.debug("ship_view called by user %s" % request.user)
+    corp = EveCorporationInfo.objects.get(corporation_id=settings.CORP_ID)
+
+    #TODO: make this configurable
+    ships_of_interest = []
+    groups = EveCrestManager.get_group_members(["Carrier", "Dreadnought", "Supercarrier", "Titan"])
+    for groupname, groupmembers in groups.items():
+        ships_of_interest.extend(groupmembers)
+
+    ship_ids_of_interest = {id:name for name, id in EveCrestManager.get_type_ids(ships_of_interest).items()}
+
+    Ship = namedtuple('Ship', ['ship_type','ship_class', 'character', 'main_character'])
+
+    systems = EveCrestManager.get_solar_systems()
+
+    found_ships = []
+    for api_info in EveApiKeyPair.objects.all():
+        account_assets = EveApiManager.get_assets_from_api(api_info.api_id, api_info.api_key)
+
+        main_id = int(AuthServicesInfoManager.get_auth_service_info(user=api_info.user).main_char_id)
+        main_name = EveCharacter.objects.get(character_id=main_id).character_name
+
+        for char_name, char_assets in account_assets.items():
+            for location, container in char_assets.items():
+                for item in container["contents"]:
+                    if item["item_type_id"] in ship_ids_of_interest:
+                        ship_type = ship_ids_of_interest[item["item_type_id"]]
+                        for groupname, groupmembers in groups.items():
+                            if ship_type in groupmembers:
+                                ship_class = groupname
+
+
+                        found_ships.append(Ship(ship_type=ship_type,
+                                                ship_class=ship_class,
+                                                character=char_name,
+                                                main_character=main_name))
+    context = {'corp':corp, 'capitals': found_ships}
+
+    return render_to_response('registered/corputils_ship_view.html', context, context_instance=RequestContext(request))
 

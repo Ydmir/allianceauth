@@ -2,6 +2,9 @@ import evelink.api
 import evelink.char
 import evelink.eve
 
+import pycrest
+import tempfile
+
 from django.conf import settings
 
 import logging
@@ -26,6 +29,23 @@ class EveApiManager():
 
         logger.debug("Retrieved characters %s from api id %s" % (chars, api_id))
         return chars
+
+    @staticmethod
+    def get_assets_from_api(api_id, api_key):
+
+        logger.debug("Getting inventories for characters from api id %s" % api_id)
+        assets = {}
+        try:
+            api = evelink.api.API(api_key=(api_id, api_key))
+            # Should get characters
+            account = evelink.account.Account(api=api)
+            chars = account.characters()
+            for char_id, char_info in chars.result.items():
+                character = evelink.char.Char(char_id, api)
+                assets.update({char_info["name"]: character.assets().result})
+        except evelink.api.APIError:
+            logger.exception("Unhandled APIError occured.", exc_info=True)
+        return assets
 
     @staticmethod
     def get_corporation_ticker_from_id(corp_id):
@@ -290,3 +310,68 @@ class EveApiManager():
             return False
         logger.warn("Exception prevented verification of corp id %s existance. Assuming false." % corp_id)
         return False
+
+
+class EveCrestManager():
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def __getByAttrVal(objlist, attr, val):
+         ''' Searches list of dicts for a dict with dict[attr] == val '''
+         matches = [getattr(obj, attr) == val for obj in objlist]
+         index = matches.index(True)  # find first match, raise ValueError if not found
+         return objlist[index]
+
+    @staticmethod
+    def __getAllItems(page):
+        ''' Fetch data from all pages '''
+        ret = page().items
+        while hasattr(page(), 'next'):
+            page = page().next()
+            ret.extend(page().items)
+        return ret
+
+    @staticmethod
+    def get_group_members(group_names):
+        eve = pycrest.EVE(cache_dir=(tempfile.gettempdir()+"/alliance_auth"))
+
+        groups = {}
+        for group_name in group_names:
+            logger.debug("Retrieving group members for group %s " % group_name)
+            group = EveCrestManager.__getByAttrVal(EveCrestManager.__getAllItems(eve().itemGroups), "name", group_name)
+
+            group_members = []
+
+            for type in group().types:
+                group_members.append(str(type.name))
+
+            groups.update({group_name: group_members})
+
+        return groups
+
+    @staticmethod
+    def get_type_name(item_ids):
+        eve = pycrest.EVE(cache_dir=(tempfile.gettempdir()+"/alliance_auth"))
+        logger.debug("Retrieving item names for %s " % item_ids)
+
+        item_names = {item_id: EveCrestManager.__getByAttrVal(EveCrestManager.__getAllItems(eve().itemTypes),
+                                                              "id", item_id).name
+                      for item_id in set(item_ids)}
+
+        return item_names
+
+    @staticmethod
+    def get_type_ids(item_names):
+        eve = pycrest.EVE(cache_dir=(tempfile.gettempdir()+"/alliance_auth"))
+        logger.debug("Retrieving item names for %s " % item_names)
+
+        item_ids = { item_name: EveCrestManager.__getByAttrVal(EveCrestManager.__getAllItems(eve().itemTypes),
+                                                              "name", item_name).id
+                      for item_name in set(item_names)}
+        return item_ids
+
+    @staticmethod
+    def get_solar_systems():
+        eve = pycrest.EVE(cache_dir=(tempfile.gettempdir()+"/alliance_auth"))
+        return {system.id: system.name for system in EveCrestManager.__getAllItems(eve().systems)}
