@@ -37,6 +37,7 @@ urlpatterns = patterns('',
                        url(r'^add_api_key/', 'eveonline.views.add_api_key', name='auth_add_api_key'),
                        url(r'^api_key_management/', 'eveonline.views.api_key_management_view',
                            name='auth_api_key_management'),
+                       url(r'^refresh_api_pair/([0-9]+)/$', 'eveonline.views.user_refresh_api', name='auth_user_refresh_api'),
                        url(r'^delete_api_pair/(\w+)/$', 'eveonline.views.api_key_removal', name='auth_api_key_removal'),
                        url(r'^characters/', 'eveonline.views.characters_view', name='auth_characters'),
                        url(r'^main_character_change/(\w+)/$', 'eveonline.views.main_character_change',
@@ -142,6 +143,7 @@ urlpatterns = patterns('',
                        url(r'^timers/$', 'timerboard.views.timer_view', name='auth_timer_view'),
                        url(r'^add_timer/$', 'timerboard.views.add_timer_view', name='auth_add_timer_view'),
                        url(r'^remove_timer/(\w+)', 'timerboard.views.remove_timer', name='auth_remove_timer'),
+                       url(r'^edit_timer/(\w+)$', 'timerboard.views.edit_timer', name='auth_edit_timer'),
 
                        # SRP URLS
                        url(r'^srp/$', 'srp.views.srp_management', name='auth_srp_management_view'),
@@ -176,13 +178,19 @@ urlpatterns = patterns('',
                        url(r'^sigtracker/$', 'sigtracker.views.sigtracker_view', name='auth_signature_view'),
                        url(r'^add_signature/$', 'sigtracker.views.add_signature_view', name='auth_add_signature_view'),
                        url(r'^remove_signature/(\w+)', 'sigtracker.views.remove_signature', name='auth_remove_signature'),
+                       url(r'^edit_signature/(\w+)$', 'sigtracker.views.edit_signature', name='auth_edit_signature'),
 
                        # Fleet Operations Timers
                        url(r'^optimer/$', 'optimer.views.optimer_view', name='auth_optimer_view'),
                        url(r'^add_optimer/$', 'optimer.views.add_optimer_view', name='auth_add_optimer_view'),
                        url(r'^remove_optimer/(\w+)', 'optimer.views.remove_optimer', name='auth_remove_optimer'),
+                       url(r'^edit_optimer/(\w+)$', 'optimer.views.edit_optimer', name='auth_edit_optimer'),
 
-                       # Paplink
+                       # Notifications
+                       url(r'^notifications/$', 'notifications.views.notification_list', name='auth_notification_list'),
+                       url(r'^notifications/(\w+)/$', 'notifications.views.notification_view', name='auth_notification_view'),
+
+                                              # Paplink
                        url(r'^pap/$', 'paplink.views.paplink_view', name='auth_paplink_view'),
                        url(r'^pap/create/$', 'paplink.views.paplink_view', name='auth_create_paplink_view'),
                        url(r'^pap/modify/$', 'paplink.views.modify_paplink_view', name='auth_modify_paplink_view'),
@@ -191,5 +199,4 @@ urlpatterns = patterns('',
                        url(r'^pap/register/$', 'paplink.views.register_paplink', name='auth_register_paplink'),
                        url(r'^pap/link/$', 'paplink.views.paplink_view', name='auth_click_paplink_view'),
                        url(r'^pap/link/(?P<papname>[a-z0-9_-]+)/$', 'paplink.views.click_paplink_view'),
-
 )

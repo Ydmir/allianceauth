@@ -15,6 +15,4 @@ class opForm(forms.Form):
     details = forms.CharField(max_length=254, required=False, label="Extra Details")
     
     
-    
-    
-    
+
