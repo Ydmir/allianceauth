@@ -190,13 +190,12 @@ urlpatterns = patterns('',
                        url(r'^notifications/$', 'notifications.views.notification_list', name='auth_notification_list'),
                        url(r'^notifications/(\w+)/$', 'notifications.views.notification_view', name='auth_notification_view'),
 
-                                              # Paplink
+                       # Paplink
                        url(r'^pap/$', 'paplink.views.paplink_view', name='auth_paplink_view'),
                        url(r'^pap/create/$', 'paplink.views.paplink_view', name='auth_create_paplink_view'),
                        url(r'^pap/modify/$', 'paplink.views.modify_paplink_view', name='auth_modify_paplink_view'),
                        url(r'^pap/modify/(?P<date>\d\d\d\d_(0[1-9]|1[012])_(0[1-9]|[12][0-9]|3[01]))/(?P<papname>[a-z0-9_-]+)/$',
                            'paplink.views.modify_paplink_view'),
-                       url(r'^pap/register/$', 'paplink.views.register_paplink', name='auth_register_paplink'),
                        url(r'^pap/link/$', 'paplink.views.paplink_view', name='auth_click_paplink_view'),
                        url(r'^pap/link/(?P<papname>[a-z0-9_-]+)/$', 'paplink.views.click_paplink_view'),
 )
