@@ -12,7 +12,7 @@ def get_fleet_list():
 
 class PaplinkForm(forms.Form):
     papname = forms.CharField(label='Name of pap', required=True)
-    duration = forms.IntegerField(label="Duration of pap", required=True, initial=30)
+    duration = forms.IntegerField(label="Duration of pap", required=True, initial=30, min_value=1, max_value=2147483647)
     vip_count = forms.CharField(widget=forms.HiddenInput())
     fleet = forms.ChoiceField(label="Fleet", choices=get_fleet_list())
 

@@ -192,9 +192,9 @@ urlpatterns = patterns('',
 
                        # Paplink
                        url(r'^pap/$', 'paplink.views.paplink_view', name='auth_paplink_view'),
-                       url(r'^pap/create/$', 'paplink.views.paplink_view', name='auth_create_paplink_view'),
+                       url(r'^pap/create/$', 'paplink.views.create_paplink_view', name='auth_create_paplink_view'),
                        url(r'^pap/modify/$', 'paplink.views.modify_paplink_view', name='auth_modify_paplink_view'),
-                       url(r'^pap/modify/(?P<date>\d\d\d\d_(0[1-9]|1[012])_(0[1-9]|[12][0-9]|3[01]))/(?P<papname>[a-z0-9_-]+)/$',
+                       url(r'^pap/modify/(?P<datestr>\d\d\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))/(?P<papname>[a-z0-9_-]+)/$',
                            'paplink.views.modify_paplink_view'),
                        url(r'^pap/link/$', 'paplink.views.paplink_view', name='auth_click_paplink_view'),
                        url(r'^pap/link/(?P<papname>[a-z0-9_-]+)/$', 'paplink.views.click_paplink_view'),

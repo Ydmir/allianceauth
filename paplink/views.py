@@ -30,6 +30,7 @@ def paplink_view(request):
     # Will show the last 5 or so paplinks clicked by user.
     # If the user has the right privileges the site will also show the latest paplinks with the options to add VIPs and
     # manually add players.
+    #TODO: ADd functionality to step further back in the pap-history. See clicked paplinks by month for example.
     user = request.user
     logger.debug("paplink_view called by user %s" % request.user)
     latest_paps = Pap.objects.filter(user=user).order_by('-id')[:5]
@@ -44,6 +45,10 @@ def paplink_view(request):
 
     return render_to_response('registered/paplinkview.html', context, context_instance=RequestContext(request))
 
+def paplink_statistics_view(request):
+    #TODO: Some fancy statistics. Paps per corp. Paps/active member. Paps/Character. Other metrics. Run in background tasks.
+    return
+
 
 @login_required
 def click_paplink_view(request, papname):
@@ -52,7 +57,7 @@ def click_paplink_view(request, papname):
     # onload="CCPEVE.requestTrust('http://www.mywebsite.com')"
 
     # TODO: Probably a check for if we are using the IGB at all should be performed..
-    if 'HTTP_EVE_TRUSTED' in request.META:
+    if 'HTTP_EVE_TRUSTED' in request.META and request.META['HTTP_EVE_TRUSTED'] == "Yes":
         # Retrieve the latest pap using the link.
         try:
             paplink = Paplink.objects.filter(name=papname).latest(field_name="papdatetime")
@@ -75,7 +80,7 @@ def click_paplink_view(request, papname):
                     pap.shiptype = request.META['HTTP_EVE_SHIPTYPENAME']
                     pap.paplink = paplink
                     pap.character = character
-                    pap.user = request.user
+                    pap.user = character.user
                     try:
                         pap.full_clean()
                         pap.save()
@@ -150,8 +155,14 @@ def create_paplink_view(request):
 
 @login_required
 @permission_required('auth.paplink')
-def modify_paplink_view(request, date, papname):
+def modify_paplink_view(request, datestr=None, papname=""):
     logger.debug("modify_paplink_view called by user %s" % request.user)
+    if not papname:
+        return HttpResponseRedirect('/pap/')
+
+    date = datetime.datetime.strptime(datestr, "%Y-%m-%d").date()
+
+    paplink = Paplink.objects.filter(name=papname).filter(papdate=date)
 
     context = {}
 
