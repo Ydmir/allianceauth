@@ -11,10 +11,10 @@ def get_sentinel_user():
 
 class Paplink(models.Model):
     papdatetime = models.DateTimeField(default=timezone.now())
-    papdate = models.DateField(default=date.today())
     duration = models.PositiveIntegerField()
     fleet = models.CharField(max_length=254, default="")
-    name = models.CharField(max_length=254, unique_for_date="papdate")
+    name = models.CharField(max_length=254)
+    hash = models.CharField(max_length=254, unique=True)
     creator = models.ForeignKey(User, on_delete=models.SET(get_sentinel_user))
 
     def __str__(self):

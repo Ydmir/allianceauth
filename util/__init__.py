@@ -17,6 +17,7 @@ def bootstrap_permissions():
     Permission.objects.get_or_create(codename="jabber_broadcast", content_type=ct, name="jabber_broadcast")
     Permission.objects.get_or_create(codename="jabber_broadcast_all", content_type=ct, name="jabber_broadcast_all")
     Permission.objects.get_or_create(codename="paplink", content_type=ct, name="paplink")
+    Permission.objects.get_or_create(codename="paplink_statistics", content_type=ct, name="paplink_statistics")
     Permission.objects.get_or_create(codename="human_resources", content_type=ct, name="human_resources")
     Permission.objects.get_or_create(codename="blue_member", content_type=ct, name="blue_member")
     Permission.objects.get_or_create(codename="corp_stats", content_type=ct, name="corp_stats")

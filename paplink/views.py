@@ -33,14 +33,14 @@ def paplink_view(request):
     #TODO: ADd functionality to step further back in the pap-history. See clicked paplinks by month for example.
     user = request.user
     logger.debug("paplink_view called by user %s" % request.user)
-    latest_paps = Pap.objects.filter(user=user).order_by('-id')[:5]
 
+    latest_paps = Pap.objects.filter(user=user).order_by('-id')[:5]
     if check_if_user_has_permission(user, 'paplink'):
         latest_links = Paplink.objects.all().order_by('-id')[:5]
-        context = {'user':user, 'latest_paps': latest_paps, 'latest_links': latest_links}
+        context = {'user':user, 'paps': latest_paps, 'paplinks': latest_links}
 
     else:
-        context = {'user':user, 'latest_paps': latest_paps}
+        context = {'user':user, 'paps': latest_paps}
 
 
     return render_to_response('registered/paplinkview.html', context, context_instance=RequestContext(request))

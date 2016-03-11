@@ -25,7 +25,7 @@
                 <th class="text-center">Ship</th>
                 <th class="text-center">Eve Time</th>
             </tr>
-            {% for pap in latest_paps %}
+            {% for pap in paps %}
             <tr>
                 <td class="text-center">{{ pap.paplink.name }}</td>
                 <td class="text-center">{{ pap.character.character_name }}</td>
@@ -51,7 +51,7 @@
                 <th class="text-center">Duration</th>
                 <th class="text-center">Edit</th>
             </tr>
-            {% for link in latest_links %}
+            {% for link in paplinks %}
             <tr>
                 <td class="text-center"><a href="{%  url 'auth_click_paplink_view' %}{{ link.name }}">{{ link.name }}</a></td>
                 <td class="text-center">{{ link.creator.username }}</td>
