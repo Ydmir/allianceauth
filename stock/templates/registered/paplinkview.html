@@ -9,7 +9,7 @@
     <div class="col-lg-12">
         <h1 class="page-header text-center">Participation data
             <div class="text-right">
-                {% if perms.auth.timer_management %}
+                {% if perms.auth.paplink %}
                 <a href="{% url 'auth_create_paplink_view' %}">
                     <button type="button" class="btn btn-success">Create Paplink</button>
                 </a>
@@ -53,13 +53,13 @@
             </tr>
             {% for link in paplinks %}
             <tr>
-                <td class="text-center"><a href="{%  url 'auth_click_paplink_view' %}{{ link.name }}">{{ link.name }}</a></td>
+                <td class="text-center"><a href="{%  url 'auth_click_paplink_view' %}{{ link.hash }}/{{ link.name }}">{{ link.name }}</a></td>
                 <td class="text-center">{{ link.creator.username }}</td>
                 <td class="text-center">{{ link.fleet }}</td>
                 <td class="text-center">{{ link.papdatetime }}</td>
                 <td class="text-center">{{ link.duration }}</td>
                 <td class="text-center">
-                    <a href="{%  url 'auth_modify_paplink_view' %}{{ link.papdate|date:"Y-m-d" }}/{{ link.name }}">
+                    <a href="{%  url 'auth_modify_paplink_view' %}{{ link.hash }}/{{ link.name }}">
                         <button type="button" class="btn btn-info"><span
                                 class="glyphicon glyphicon-edit"></span></button>
                     </a>

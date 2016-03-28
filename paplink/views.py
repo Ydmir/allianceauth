@@ -18,6 +18,9 @@ from models import Pap
 
 from slugify import slugify
 
+
+import string
+import random
 import datetime
 
 
@@ -51,7 +54,7 @@ def paplink_statistics_view(request):
 
 
 @login_required
-def click_paplink_view(request, papname):
+def click_paplink_view(request, hash, papname):
     # Take IG-header data and register the pap if not existing already.
     # use obj, created = Pap.objects.get_or_create()
     # onload="CCPEVE.requestTrust('http://www.mywebsite.com')"
@@ -60,13 +63,8 @@ def click_paplink_view(request, papname):
     if 'HTTP_EVE_TRUSTED' in request.META and request.META['HTTP_EVE_TRUSTED'] == "Yes":
         # Retrieve the latest pap using the link.
         try:
-            paplink = Paplink.objects.filter(name=papname).latest(field_name="papdatetime")
+            paplink = Paplink.objects.filter(hash=hash)[0]
             valid = True
-            print "---------------"
-            print timezone.now()
-            print paplink.papdatetime
-            print datetime.timedelta(seconds=(paplink.duration*60))
-            print (timezone.now() - paplink.papdatetime)
 
             if (timezone.now() - paplink.papdatetime) < datetime.timedelta(seconds=(paplink.duration*60)):
                 active = True
@@ -122,6 +120,7 @@ def create_paplink_view(request):
                 paplink.fleet = form.cleaned_data["fleet"]
                 paplink.duration = form.cleaned_data["duration"]
                 paplink.creator = request.user
+                paplink.hash = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(10))
                 try:
                     paplink.full_clean()
                     paplink.save()
@@ -155,15 +154,28 @@ def create_paplink_view(request):
 
 @login_required
 @permission_required('auth.paplink')
-def modify_paplink_view(request, datestr=None, papname=""):
+def modify_paplink_view(request, hash=""):
     logger.debug("modify_paplink_view called by user %s" % request.user)
-    if not papname:
+    if not hash:
         return HttpResponseRedirect('/pap/')
 
-    date = datetime.datetime.strptime(datestr, "%Y-%m-%d").date()
+    paplink = Paplink.objects.filter(hash=hash)[0]
 
-    paplink = Paplink.objects.filter(name=papname).filter(papdate=date)
+    if(request.GET.get('removechar')):
+        character_id = request.GET.get('removechar')
+        character = EveCharacter.objects.filter(character_id=character_id)
+        logger.debug("Removing character %s from paplink  %s" % (character.character_name ,paplink.name))
 
-    context = {}
+        Pap.objects.filter(paplink=paplink).filter(character=character).delete()
 
-    return render_to_response('registered/paplinkformatter.html', context, context_instance=RequestContext(request))
+    if(request.GET.get('deletepap')):
+        logger.debug("Removing paplink  %s" % paplink.name)
+        paplink.delete()
+        return HttpResponseRedirect('/pap/')
+
+    registered_paps = Pap.objects.filter(paplink=paplink).order_by('character')
+
+    context = {'paplink':paplink, 'registered_paps':registered_paps}
+
+    return render_to_response('registered/paplinkmodify.html', context, context_instance=RequestContext(request))
+

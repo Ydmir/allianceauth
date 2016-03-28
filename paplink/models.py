@@ -22,7 +22,7 @@ class Paplink(models.Model):
 
 
 class Pap(models.Model):
-    character = models.ForeignKey(EveCharacter)
+    character = models.ForeignKey(EveCharacter, on_delete=models.CASCADE)
     paplink = models.ForeignKey(Paplink)
     system = models.CharField(max_length=30)
     shiptype = models.CharField(max_length=30)
@@ -38,7 +38,7 @@ class Pap(models.Model):
 
 
 class VipPap(models.Model):
-    character = models.ForeignKey(EveCharacter)
+    character = models.ForeignKey(EveCharacter, on_delete=models.CASCADE)
     paplink = models.ForeignKey(Paplink)
     # user?
 
