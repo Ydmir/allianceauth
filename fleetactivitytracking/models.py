@@ -9,8 +9,8 @@ from django.utils import timezone
 def get_sentinel_user():
     return User.objects.get_or_create(username='deleted')[0]
 
-class Paplink(models.Model):
-    papdatetime = models.DateTimeField(default=timezone.now())
+class Fatlink(models.Model):
+    fatdatetime = models.DateTimeField(default=timezone.now())
     duration = models.PositiveIntegerField()
     fleet = models.CharField(max_length=254, default="")
     name = models.CharField(max_length=254)
@@ -21,30 +21,30 @@ class Paplink(models.Model):
         return self.name
 
 
-class Pap(models.Model):
+class Fat(models.Model):
     character = models.ForeignKey(EveCharacter, on_delete=models.CASCADE)
-    paplink = models.ForeignKey(Paplink)
+    fatlink = models.ForeignKey(Fatlink)
     system = models.CharField(max_length=30)
     shiptype = models.CharField(max_length=30)
     station = models.CharField(max_length=125)
     user = models.ForeignKey(User)
 
     class Meta:
-        unique_together = (('character', 'paplink'),)
+        unique_together = (('character', 'fatlink'),)
 
     def __str__(self):
-        output = "Pap for %s" % self.character.character_name
+        output = "Fat-link for %s" % self.character.character_name
         return output.encode('utf-8')
 
 
-class VipPap(models.Model):
+class VipFat(models.Model):
     character = models.ForeignKey(EveCharacter, on_delete=models.CASCADE)
-    paplink = models.ForeignKey(Paplink)
+    fatlink = models.ForeignKey(Fatlink)
     # user?
 
     class Meta:
-        unique_together = (('character', 'paplink'),)
+        unique_together = (('character', 'fatlink'),)
 
     def __str__(self):
-        output = "VIP pap for %s" % self.character.character_name
+        output = "VIP fat-link for %s" % self.character.character_name
         return output.encode('utf-8')

@@ -10,16 +10,16 @@ def get_fleet_list():
     return fleetlist
 
 
-class PaplinkForm(forms.Form):
-    papname = forms.CharField(label='Name of pap', required=True)
-    duration = forms.IntegerField(label="Duration of pap", required=True, initial=30, min_value=1, max_value=2147483647)
+class FatlinkForm(forms.Form):
+    fatname = forms.CharField(label='Name of fat-link', required=True)
+    duration = forms.IntegerField(label="Duration of fat-link", required=True, initial=30, min_value=1, max_value=2147483647)
     vip_count = forms.CharField(widget=forms.HiddenInput())
     fleet = forms.ChoiceField(label="Fleet", choices=get_fleet_list())
 
     def __init__(self, *args, **kwargs):
         n_vips = kwargs.pop('extra', 0)
 
-        super(PaplinkForm, self).__init__(*args, **kwargs)
+        super(FatlinkForm, self).__init__(*args, **kwargs)
         self.fields['vip_count'].initial = n_vips
         for index in range(int(n_vips)):
             self.fields['vip_{index}'.format(index=index)] = forms.CharField(required=False)

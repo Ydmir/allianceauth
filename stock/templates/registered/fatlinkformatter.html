@@ -2,9 +2,9 @@
 {% load bootstrap %}
 {% load staticfiles %}
 
-{% block title %}Alliance Auth - Fleet Operation Create{% endblock %}
+{% block title %}Alliance Auth - Fatlink Create{% endblock %}
 
-{% block page_title %}Create Operation{% endblock page_title %}
+{% block page_title %}Create Fatlink{% endblock page_title %}
 {% block extra_css %}
     <link href="{% static 'css/jquery.datetimepicker.css' %}" rel="stylesheet" type="text/css">{% endblock extra_css %}
 
@@ -25,7 +25,7 @@
                             {% csrf_token %}
                             {{ form|bootstrap }}
                             <br/>
-                            <button class="btn btn-lg btn-primary btn-block" type="submit" name="submit_pap">Create Paplink</button>
+                            <button class="btn btn-lg btn-primary btn-block" type="submit" name="submit_fat">Create fatlink</button>
                         </form>
                 </div>
             </div>

@@ -190,12 +190,15 @@ urlpatterns = patterns('',
                        url(r'^notifications/$', 'notifications.views.notification_list', name='auth_notification_list'),
                        url(r'^notifications/(\w+)/$', 'notifications.views.notification_view', name='auth_notification_view'),
 
-                       # Paplink
-                       url(r'^pap/$', 'paplink.views.paplink_view', name='auth_paplink_view'),
-                       url(r'^pap/create/$', 'paplink.views.create_paplink_view', name='auth_create_paplink_view'),
-                       url(r'^pap/modify/$', 'paplink.views.modify_paplink_view', name='auth_modify_paplink_view'),
-                       url(r'^pap/modify/(?P<hash>[a-zA-Z0-9_-]+)/([a-z0-9_-]+)$', 'paplink.views.modify_paplink_view'),
-                       url(r'^pap/link/$', 'paplink.views.paplink_view', name='auth_click_paplink_view'),
-                       url(r'^pap/link/(?P<hash>[a-zA-Z0-9]+)/(?P<papname>[a-z0-9_-]+)/$',
-                           'paplink.views.click_paplink_view'),
-)
+                       # FleetActivityTracking (FAT)
+                       url(r'^fat/$', 'fleetactivitytracking.views.fatlink_view', name='auth_fatlink_view'),
+                       url(r'^fat/statistics/$', 'fleetactivitytracking.views.fatlink_statistics_view', name='auth_fatlink_view_statistics'),
+                       url(r'^fat/statistics/(?P<year>[0-9]+)/(?P<month>[0-9]+)/$', 'fleetactivitytracking.views.fatlink_statistics_view', name='auth_fatlink_view_statistics_month'),
+                       url(r'^fat/create/$', 'fleetactivitytracking.views.create_fatlink_view', name='auth_create_fatlink_view'),
+                       url(r'^fat/modify/$', 'fleetactivitytracking.views.modify_fatlink_view', name='auth_modify_fatlink_view'),
+                       url(r'^fat/modify/(?P<hash>[a-zA-Z0-9_-]+)/([a-z0-9_-]+)$',
+                           'fleetactivitytracking.views.modify_fatlink_view'),
+                       url(r'^fat/link/$', 'fleetactivitytracking.views.fatlink_view', name='auth_click_fatlink_view'),
+                       url(r'^fat/link/(?P<hash>[a-zA-Z0-9]+)/(?P<fatname>[a-z0-9_-]+)/$',
+                           'fleetactivitytracking.views.click_fatlink_view'),
+                       )

@@ -61,7 +61,7 @@ INSTALLED_APPS = (
     'sigtracker',
     'optimer',
     'corputils',
-    'paplink',
+    'fleetactivitytracking',
     'notifications',
 )
 
@@ -471,7 +471,7 @@ LOGGING = {
             'handlers': ['log_file', 'console', 'notifications'],
             'level': 'DEBUG',
         },
-        'paplink': {
+        'fleetactivitytracking': {
             'handlers': ['log_file', 'console'],
             'level': 'ERROR',
         },
