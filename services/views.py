@@ -14,9 +14,9 @@ from managers.mumble_manager import MumbleManager
 from managers.ipboard_manager import IPBoardManager
 from managers.teamspeak3_manager import Teamspeak3Manager
 from managers.discord_manager import DiscordManager
+from managers.ips4_manager import Ips4Manager
 from authentication.managers import AuthServicesInfoManager
 from eveonline.managers import EveManager
-from celerytask.tasks import remove_all_syncgroups_for_service
 from celerytask.tasks import update_jabber_groups
 from celerytask.tasks import update_mumble_groups
 from celerytask.tasks import update_forum_groups
@@ -27,6 +27,7 @@ from forms import JabberBroadcastForm
 from forms import FleetFormatterForm
 from forms import DiscordForm
 from forms import ServicePasswordForm
+from forms import TeamspeakJoinForm
 from util import check_if_user_has_permission
 
 import threading
@@ -135,7 +136,7 @@ def activate_forum(request):
     if result[0] != "":
         AuthServicesInfoManager.update_user_forum_info(result[0], result[1], request.user)
         logger.debug("Updated authserviceinfo for user %s with forum credentials. Updating groups." % request.user)
-        update_forum_groups(request.user)
+        update_forum_groups.delay(request.user.pk)
         logger.info("Succesfully activated forum for user %s" % request.user)
         return HttpResponseRedirect("/services/")
     logger.error("Unsuccesful attempt to activate forum for user %s" % request.user)
@@ -148,7 +149,6 @@ def deactivate_forum(request):
     logger.debug("deactivate_forum called by user %s" % request.user)
     authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
     result = Phpbb3Manager.disable_user(authinfo.forum_username)
-    remove_all_syncgroups_for_service(request.user, "phpbb")
     # false we failed
     if result:
         AuthServicesInfoManager.update_user_forum_info("", "", request.user)
@@ -185,7 +185,7 @@ def activate_ipboard_forum(request):
     if result[0] != "":
         AuthServicesInfoManager.update_user_ipboard_info(result[0], result[1], request.user)
         logger.debug("Updated authserviceinfo for user %s with ipboard credentials. Updating groups." % request.user)
-        update_ipboard_groups(request.user)
+        update_ipboard_groups.delay(request.user.pk)
         logger.info("Succesfully activated ipboard for user %s" % request.user)
         return HttpResponseRedirect("/services/")
     logger.error("Unsuccesful attempt to activate ipboard for user %s" % request.user)
@@ -198,7 +198,6 @@ def deactivate_ipboard_forum(request):
     logger.debug("deactivate_ipboard_forum called by user %s" % request.user)
     authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
     result = IPBoardManager.disable_user(authinfo.ipboard_username)
-    remove_all_syncgroups_for_service(request.user, "ipboard")
     # false we failed
     if result:
         AuthServicesInfoManager.update_user_ipboard_info("", "", request.user)
@@ -234,7 +233,7 @@ def activate_jabber(request):
     if info[0] is not "":
         AuthServicesInfoManager.update_user_jabber_info(info[0], info[1], request.user)
         logger.debug("Updated authserviceinfo for user %s with jabber credentials. Updating groups." % request.user)
-        update_jabber_groups(request.user)
+        update_jabber_groups.delay(request.user.pk)
         logger.info("Succesfully activated jabber for user %s" % request.user)
         return HttpResponseRedirect("/services/")
     logger.error("Unsuccesful attempt to activate jabber for user %s" % request.user)
@@ -247,7 +246,6 @@ def deactivate_jabber(request):
     logger.debug("deactivate_jabber called by user %s" % request.user)
     authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
     result = OpenfireManager.delete_user(authinfo.jabber_username)
-    remove_all_syncgroups_for_service(request.user, "openfire")
     # If our username is blank means we failed
     if result:
         AuthServicesInfoManager.update_user_jabber_info("", "", request.user)
@@ -288,7 +286,7 @@ def activate_mumble(request):
     if result[0] is not "":
         AuthServicesInfoManager.update_user_mumble_info(result[0], result[1], request.user)
         logger.debug("Updated authserviceinfo for user %s with mumble credentials. Updating groups." % request.user)
-        update_mumble_groups(request.user)
+        update_mumble_groups.delay(request.user.pk)
         logger.info("Succesfully activated mumble for user %s" % request.user)
         return HttpResponseRedirect("/services/")
     logger.error("Unsuccessful attempt to activate mumble for user %s" % request.user)
@@ -301,7 +299,6 @@ def deactivate_mumble(request):
     logger.debug("deactivate_mumble called by user %s" % request.user)
     authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
     result = MumbleManager.delete_user(authinfo.mumble_username)
-    remove_all_syncgroups_for_service(request.user, "mumble")
     # if false we failed
     if result:
         AuthServicesInfoManager.update_user_mumble_info("", "", request.user)
@@ -344,12 +341,32 @@ def activate_teamspeak3(request):
     if result[0] is not "":
         AuthServicesInfoManager.update_user_teamspeak3_info(result[0], result[1], request.user)
         logger.debug("Updated authserviceinfo for user %s with TS3 credentials. Updating groups." % request.user)
-        update_teamspeak3_groups(request.user)
         logger.info("Succesfully activated TS3 for user %s" % request.user)
-        return HttpResponseRedirect("/services/")
+        return HttpResponseRedirect("/verify_teamspeak3/")
     logger.error("Unsuccessful attempt to activate TS3 for user %s" % request.user)
     return HttpResponseRedirect("/dashboard")
 
+@login_required
+@user_passes_test(service_blue_alliance_test)
+def verify_teamspeak3(request):
+    logger.debug("verify_teamspeak3 called by user %s" % request.user)
+    authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
+    if not authinfo.teamspeak3_uid:
+        logger.warn("Unable to validate user %s teamspeak: no teamspeak data" % request.user)
+        return HttpResponseRedirect("/services")
+    if request.method == "POST":
+        form = TeamspeakJoinForm(request.POST)
+        if form.is_valid():
+            update_teamspeak3_groups.delay(request.user.pk)
+            logger.debug("Validated user %s joined TS server")
+            return HttpResponseRedirect("/services/")
+    else:
+        form = TeamspeakJoinForm({'username':authinfo.teamspeak3_uid})
+    context = {
+        'form': form,
+        'authinfo': authinfo,
+    }
+    return render_to_response('registered/teamspeakjoin.html', context, context_instance=RequestContext(request))
 
 @login_required
 @user_passes_test(service_blue_alliance_test)
@@ -357,8 +374,6 @@ def deactivate_teamspeak3(request):
     logger.debug("deactivate_teamspeak3 called by user %s" % request.user)
     authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
     result = Teamspeak3Manager.delete_user(authinfo.teamspeak3_uid)
-
-    remove_all_syncgroups_for_service(request.user, "teamspeak3")
 
     # if false we failed
     if result:
@@ -378,8 +393,6 @@ def reset_teamspeak3_perm(request):
     logger.debug("Deleting TS3 user for user %s" % request.user)
     Teamspeak3Manager.delete_user(authinfo.teamspeak3_uid)
 
-    remove_all_syncgroups_for_service(request.user, "teamspeak3")
-
     if check_if_user_has_permission(request.user, "blue_member"):
         logger.debug("Generating new permission key for blue user %s with main character %s" % (request.user, character))
         result = Teamspeak3Manager.generate_new_blue_permissionkey(authinfo.teamspeak3_uid, character.character_name,
@@ -393,7 +406,7 @@ def reset_teamspeak3_perm(request):
     if result != "":
         AuthServicesInfoManager.update_user_teamspeak3_info(result[0], result[1], request.user)
         logger.debug("Updated authserviceinfo for user %s with TS3 credentials. Updating groups." % request.user)
-        update_teamspeak3_groups(request.user)
+        update_teamspeak3_groups.delay(request.user)
         logger.info("Successfully reset TS3 permission key for user %s" % request.user)
         return HttpResponseRedirect("/services/")
     logger.error("Unsuccessful attempt to reset TS3 permission key for user %s" % request.user)
@@ -413,7 +426,6 @@ def deactivate_discord(request):
     authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
     result = DiscordManager.delete_user(authinfo.discord_uid)
     if result:
-        remove_all_syncgroups_for_service(request.user, "discord")
         AuthServicesInfoManager.update_user_discord_info("", request.user)
         logger.info("Succesfully deactivated discord for user %s" % request.user)
         return HttpResponseRedirect("/services/")
@@ -453,7 +465,7 @@ def activate_discord(request):
                 if user_id != "":
                     AuthServicesInfoManager.update_user_discord_info(user_id, request.user)
                     logger.debug("Updated discord id %s for user %s" % (user_id, request.user))
-                    update_discord_groups(request.user)
+                    update_discord_groups.delay(request.user.pk)
                     logger.debug("Updated discord groups for user %s." % request.user)
                     success = True
                     logger.info("Succesfully activated discord for user %s" % request.user)
@@ -593,3 +605,81 @@ def set_ipboard_password(request):
     context = {'form': form, 'service': 'IPBoard', 'error': error}
     return render_to_response('registered/service_password.html', context, context_instance=RequestContext(request))
 
+@login_required
+@user_passes_test(service_blue_alliance_test)
+def activate_ips4(request):
+    logger.debug("activate_ips4 called by user %s" % request.user)
+    authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
+    # Valid now we get the main characters
+    character = EveManager.get_character_by_id(authinfo.main_char_id)
+    logger.debug("Adding IPS4 user for user %s with main character %s" % (request.user, character))
+    result = Ips4Manager.add_user(character.character_name, request.user.email)
+    # if empty we failed
+    if result[0] != "":
+        AuthServicesInfoManager.update_user_ips4_info(result[0], result[1], result[2], request.user)
+        logger.debug("Updated authserviceinfo for user %s with IPS4 credentials." % request.user)
+        #update_ips4_groups.delay(request.user.pk)
+        logger.info("Succesfully activated IPS4 for user %s" % request.user)
+        return HttpResponseRedirect("/services/")
+    logger.error("Unsuccesful attempt to activate IPS4 for user %s" % request.user)
+    return HttpResponseRedirect("/dashboard")
+
+@login_required
+@user_passes_test(service_blue_alliance_test)
+def reset_ips4_password(request):
+    logger.debug("reset_ips4_password called by user %s" % request.user)
+    authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
+    result = Ips4Manager.update_user_password(authinfo.ips4_username)
+    member_id = Ips4Manager.get_user_id(authinfo.ips4_username)
+    # false we failed
+    if result != "":
+        AuthServicesInfoManager.update_user_ips4_info(authinfo.ips4_username, result, member_id, request.user)
+        logger.info("Succesfully reset IPS4 password for user %s" % request.user)
+        return HttpResponseRedirect("/services/")
+    logger.error("Unsuccessful attempt to reset IPS4 password for user %s" % request.user)
+    return HttpResponseRedirect("/dashboard")
+
+@login_required
+@user_passes_test(service_blue_alliance_test)
+def set_ips4_password(request):
+    logger.debug("set_ips4_password called by user %s" % request.user)
+    error = None
+    if request.method == 'POST':
+        logger.debug("Received POST request with form.")
+        form = ServicePasswordForm(request.POST)
+        logger.debug("Form is valid: %s" % form.is_valid())
+        if form.is_valid():
+            password = form.cleaned_data['password']
+            logger.debug("Form contains password of length %s" % len(password))
+            authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
+            result = Ips4Manager.update_custom_password(authinfo.ips4_username, plain_password=password)
+            member_id = Ips4Manager.get_user_id(authinfo.ips4_username)
+            if result != "":
+                AuthServicesInfoManager.update_user_ips4_info(authinfo.ips4_username, result, member_id, request.user)
+                logger.info("Succesfully reset IPS4 password for user %s" % request.user)
+                return HttpResponseRedirect("/services/")
+            else:
+                logger.error("Failed to install custom IPS4 password for user %s" % request.user)
+                error = "Failed to install custom password."
+        else:
+            error = "Invalid password provided"
+    else:
+        logger.debug("Request is not type POST - providing empty form.")
+        form = ServicePasswordForm()
+
+    logger.debug("Rendering form for user %s" % request.user)
+    context = {'form': form, 'service': 'IPS4', 'error': error}
+    return render_to_response('registered/service_password.html', context, context_instance=RequestContext(request))
+
+@login_required
+@user_passes_test(service_blue_alliance_test)
+def deactivate_ips4(request):
+    logger.debug("deactivate_ips4 called by user %s" % request.user)
+    authinfo = AuthServicesInfoManager.get_auth_service_info(request.user)
+    result = Ips4Manager.delete_user(authinfo.ips4_id)
+    if result != "":
+        AuthServicesInfoManager.update_user_ips4_info("", "", "", request.user)
+        logger.info("Succesfully deactivated IPS4 for user %s" % request.user)
+        return HttpResponseRedirect("/services/")
+    logger.error("Unsuccesful attempt to deactivate IPS4 for user %s" % request.user)
+    return HttpResponseRedirect("/dashboard")

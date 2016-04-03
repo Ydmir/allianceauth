@@ -130,6 +130,33 @@
                     </td>
                 </tr>
             {% endif %}
+            {% if ENABLE_BLUE_IPS4 %}
+                <td class="text-center">IPS4</td>
+                <td class="text-center">{{ authinfo.ips4_username }}</td>
+                <td class="text-center">{{ authinfo.ips4_password }}</td>
+                <td class="text-center"><a href="{{ IPS4_URL }}">{{ IPS4_URL }}</a></td>
+                <td class="text-center">
+                    {% ifequal authinfo.ips4_username "" %}
+                        <a href="{% url 'auth_activate_ips4' %}">
+                            <button type="button" class="btn btn-warning"><span
+                                    class="glyphicon glyphicon-ok"></span></button>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'auth_set_ips4_password' %}">
+                            <button type="button" class="btn btn-warning"><span
+                                    class="glyphicon glyphicon-pencil"></span></button>
+                        </a>
+                        <a href="{% url 'auth_reset_ips4_password' %}">
+                            <button type="button" class="btn btn-primary"><span
+                                    class="glyphicon glyphicon-refresh"></span></button>
+                        </a>
+                        <a href="{% url 'auth_deactivate_ips4' %}">
+                            <button type="button" class="btn btn-danger"><span
+                                    class="glyphicon glyphicon-remove"></span></button>
+                        </a>
+                    {% endifequal %}
+                </td>
+            {% endif %}
             {% if ENABLE_BLUE_DISCORD %}
                 <tr>
                     <td class="text-center">Discord</td>
@@ -181,6 +208,7 @@
                                         class="glyphicon glyphicon-ok"></span></button>
                             </a>
                         {% else %}
+                            <a href="{% url 'auth_verify_teamspeak3' %}" class="btn btn-success" title="Verify"><span class="glyphicon glyphicon-log-in"></a>
                             <a href="{% url 'auth_reset_teamspeak3_perm' %}">
                                 <button type="button" class="btn btn-primary"><span
                                         class="glyphicon glyphicon-refresh"></span></button>
@@ -317,6 +345,33 @@
                     </td>
                 </tr>
             {% endif %}
+            {% if ENABLE_AUTH_IPS4 %}
+                <td class="text-center">IPS4</td>
+                <td class="text-center">{{ authinfo.ips4_username }}</td>
+                <td class="text-center">{{ authinfo.ips4_password }}</td>
+                <td class="text-center"><a href="{{ IPS4_URL }}">{{ IPS4_URL }}</a></td>
+                <td class="text-center">
+                    {% ifequal authinfo.ips4_username "" %}
+                        <a href="{% url 'auth_activate_ips4' %}">
+                            <button type="button" class="btn btn-warning"><span
+                                    class="glyphicon glyphicon-ok"></span></button>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'auth_set_ips4_password' %}">
+                            <button type="button" class="btn btn-warning"><span
+                                    class="glyphicon glyphicon-pencil"></span></button>
+                        </a>
+                        <a href="{% url 'auth_reset_ips4_password' %}">
+                            <button type="button" class="btn btn-primary"><span
+                                    class="glyphicon glyphicon-refresh"></span></button>
+                        </a>
+                        <a href="{% url 'auth_deactivate_ips4' %}">
+                            <button type="button" class="btn btn-danger"><span
+                                    class="glyphicon glyphicon-remove"></span></button>
+                        </a>
+                    {% endifequal %}
+                </td>
+            {% endif %}
             {% if ENABLE_AUTH_DISCORD %}
                 <tr>
                     <td class="text-center">Discord</td>
@@ -357,7 +412,7 @@
                     <td class="text-center">
                         {% ifequal authinfo.teamspeak3_uid "" %}
                         {% else %}
-                            <a href="ts3server://{{ TEAMSPEAK3_PUBLIC_URL }}?token={{ authinfo.teamspeak3_perm_key }}">Teamspeak3
+                            <a href="ts3server://{{ TEAMSPEAK3_PUBLIC_URL }}?token={{ authinfo.teamspeak3_perm_key }}&nickname={{ authinfo.teamspeak3_uid }}">Teamspeak3
                                 Link</a>
                         {% endifequal %}
                     </td>
@@ -368,6 +423,7 @@
                                         class="glyphicon glyphicon-ok"></span></button>
                             </a>
                         {% else %}
+                            <a href="{% url 'auth_verify_teamspeak3' %}" class="btn btn-success" title="Verify"><span class="glyphicon glyphicon-log-in"></a>
                             <a href="{% url 'auth_reset_teamspeak3_perm' %}">
                                 <button type="button" class="btn btn-primary"><span
                                         class="glyphicon glyphicon-refresh"></span></button>

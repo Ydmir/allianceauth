@@ -5,6 +5,7 @@ evelink
 dnspython
 passlib
 requests>=2.9.1
+zeroc-ice
 slugify
 #requests_cache
 

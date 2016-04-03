@@ -1,10 +1,12 @@
 Alliance Auth
 ============
 
+[![Join the chat at https://gitter.im/R4stl1n/allianceauth](https://badges.gitter.im/R4stl1n/allianceauth.svg)](https://gitter.im/R4stl1n/allianceauth?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Alliance service auth to help large scale alliances manage services.
 Built for "The 99 Percent" open for anyone to use
 
-[Documentation and Setup Guides](http://allianceauth.com)
+[Documentation and Setup Guides](https://github.com/R4stl1n/allianceauth/wiki)
 
 [Project Website](http://r4stl1n.github.io/allianceauth/)
 
@@ -16,10 +18,7 @@ Join us in-game in the channel allianceauth for help and feature requests.
 
 Special Thanks: 
 
-    Thanking Nikdoof, without his old auth 
-    implementation this project wouldn't be as far as it is now.
-    
-    Thanks to Raynaldo for his original work on this system and getting it as far as it is today.
+    Thanking Nikdoof, without his old auth implementation this project wouldn't be as far as it is now.
 
 Note:
 
@@ -61,12 +60,11 @@ Special Permissions In Admin:
 
     auth | user | alliance_member ( Added auto by auth when a member is verified )
     auth | user | group_management ( Access to add members to groups within the alliance )
-    auth | user | human_resources ( Corp only access to view applications )
     auth | user | jabber_broadcast ( Access to broadcast a message over jabber to own groups)
     auth | user | jabber_broadcast_all ( Can choose from all groups and the 'all' option when broadcasting)
     auth | user | blue_member ( Auto Added to people who register has a blue when adding api key)
-    auth | user | corp_stats ( View basic corp auth stats *who is authed etc*)
-    auth | user | corputils ( View who has registered APIs, which alts belong to which main, and more. )
+    auth | user | corp_apis ( View APIs, and jackKnife, of all members in user's corp. )
+    auth | user | alliance_apis ( View APIs, and jackKnife, of all member in user's alliance member corps. )
     auth | user | timer_management ( Access to create and remove timers)
     auth | user | timer_view ( Access to timerboard to view timers)
     auth | user | srp_management ( Allows for an individual to create and remove srp fleets and fleet data)
@@ -75,6 +73,13 @@ Special Permissions In Admin:
     auth | user | optimer_management ( Allows for an individual to create and remove fleet operations)
     auth | user | optimer_view ( Allows for an individual view fleet operations)
     auth | user | logging_notifications ( Generate notifications from logging)
+
+    auth | user | human_resources ( View applications to user's corp )
+    hrapplications | application | delete_application ( Can delete applications )
+    hrapplications | application | accept_application ( Can accept applications )
+    hrapplications | application | reject_application ( Can reject applications )
+    hrapplications | application | view_apis ( Can see applicant's API keys )
+    hrapplicstions | applicationcomment | add_applicationcomment ( Can comment on applications )
 
 Active Developers
 

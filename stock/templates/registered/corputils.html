@@ -9,7 +9,6 @@
 
     <div class="col-lg-12">
         <h1 class="page-header text-center">Corporation Member Data</h1>
-        {% if perms.auth.corputils %}
             <div class="col-lg-12 container" id="example">
             {% if corp %}
                 <div class="row">
@@ -29,13 +28,13 @@
 
                                          <p>Player count: {{characters_with_api|length}}</p>
 
-                                         <p>Unregistered characters: {{characters_without_api|length}}</p>
+                                         <p>Unregistered characters: {{characters_without_api|length|add:n_unacounted}}</p>
                                     </div>
                                     <div class="col-lg-12 col-sm-5">
                                         <b>API Index:</b>
                                         <div class="progress">
-                                            <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="{{characters_with_api|length}}" aria-valuemin="0" aria-valuemax="{{ corp.member_count }}" style="width: {% widthratio characters_with_api|length corp.member_count 100 %}%;">
-                                                {{characters_with_api|length}}/{{ corp.member_count }}
+                                            <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="{{ n_registered }}" aria-valuemin="0" aria-valuemax="{{ corp.member_count }}" style="width: {% widthratio characters_with_api|length corp.member_count 100 %}%;">
+                                                {{n_registered}}/{{ corp.member_count }}
                                             </div>
                                         </div>
                                     </div>
@@ -46,13 +45,13 @@
                         <nav class="navbar navbar-default">
                             <div class="container-fluid">
                                 <ul class="nav navbar-nav navbar-wide">
-                                    {% if membercorp_list %}
+                                    {% if membercorplist and perms.auth.alliance_apis %}
                                     <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Choose corporation <span class="caret"></span></a>
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Alliance corporations <span class="caret"></span></a>
                                         <ul class="dropdown-menu scrollable">
-                                            {% for membercorp_id, membercorp_name in membercorp_list %}
+                                            {% for membercorpid, membercorpname in membercorplist %}
                                             <li>
-                                                <a href="/corputils/{{ membercorp_id }}">{{ membercorp_name }}</a>
+                                                <a href="/corputils/{{ membercorpid }}">{{ membercorpname }}</a>
                                             </li>
                                             {% endfor %}
                                         </ul>
@@ -77,7 +76,7 @@
                         </nav>
                         <ul class="nav nav-tabs">
                             <li class="active"><a data-toggle="tab" href="#gotapi">Registered Main Characters <b>({{characters_with_api|length}})</b></a></li>
-                            <li><a data-toggle="tab" href="#noapi">Characters without API <b>({{characters_without_api|length}})</b></a></li>
+                            <li><a data-toggle="tab" href="#noapi">Characters without API <b>({{characters_without_api|length|add:n_unacounted}})</b></a></li>
                         </ul>
                     <div class="tab-content">
                         <div id="gotapi" class="tab-pane fade in active">
@@ -90,7 +89,8 @@
                                             <th class="col-md-2">Main character</th>
                                             <th class="col-md-2">Main corporation</th>
                                             <th class="col-md-2">Character list</th>
-                                            <th class="col-md-5">Killboard</th>
+                                            <th class="col-md-3">Killboard</th>
+                                            <th class="col-md-2">API JackKnife</th>
                                         </tr>
                                         {% for maincharname, player  in characters_with_api %}
                                         <tr >
@@ -121,6 +121,17 @@
                                                 <p><a href="https://zkillboard.com/character/{{ char.character_id }}/" class="label label-danger" target="_blank">Killboard</a></p>
                                                 {% endfor %}
                                             </td>
+                                            <td>
+                                                {% for apiinfo in player.apilist %}
+                                                <p>
+                                                    <a href="{{ JACK_KNIFE_URL }}?usid={{ apiinfo.api_id }}&apik={{ apiinfo.api_key }}"
+                                                       target="_blank">
+                                                        <button type="button" class="btn btn-primary">API JackKnife
+                                                        </button>
+                                                    </a>
+                                                </p>
+                                                {% endfor %}
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </table>
@@ -135,7 +146,12 @@
                         <div id="noapi" class="tab-pane fade">
                         {% if characters_without_api %}
                             <div class="panel-body">
-                                <div class="table-responsive">    
+                                <div class="table-responsive">
+                                    {% if 0 < n_unacounted %}
+                                    <div class="alert alert-danger" role="alert">
+                                            <h3>There are atleast {{ n_unacounted }} characters not accounted for in EveWho.</h3>
+                                    </div>
+                                    {% endif %}
                                     <table class="table table-condensed table-hover table-striped">
                                         <tr>
                                             <th class="col-md-1"></th>
@@ -176,12 +192,5 @@
             </div>
             {% endif %}
         </div>
-        {% else %}
-            {% if IS_CORP %}
-                <div class="alert alert-danger" role="alert">You are not in the corporation.</div>
-            {% else %}
-                <div class="alert alert-danger" role="alert">You are not in the alliance.</div>
-            {% endif %}
-        {% endif %}
     </div>
 {% endblock content %}

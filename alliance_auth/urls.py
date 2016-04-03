@@ -42,7 +42,6 @@ urlpatterns = patterns('',
                        url(r'^characters/', 'eveonline.views.characters_view', name='auth_characters'),
                        url(r'^main_character_change/(\w+)/$', 'eveonline.views.main_character_change',
                            name='auth_main_character_change'),
-                       url(r'^corporation_stats/$', 'eveonline.views.corp_stats_view', name='auth_corp_stats'),
 
                        # Group management
                        url(r'^groups/', 'groupmanagement.views.groups_view', name='auth_groups'),
@@ -65,7 +64,9 @@ urlpatterns = patterns('',
                        # HR Application Management
                        url(r'^hr_application_management/', 'hrapplications.views.hr_application_management_view',
                            name="auth_hrapplications_view"),
-                       url(r'^hr_application_create/', 'hrapplications.views.hr_application_create_view',
+                       url(r'^hr_application_create/$', 'hrapplications.views.hr_application_create_view',
+                           name="auth_hrapplication_create_view"),
+                       url(r'^hr_application_create/(\d+)', 'hrapplications.views.hr_application_create_view',
                            name="auth_hrapplication_create_view"),
                        url(r'^hr_application_remove/(\w+)', 'hrapplications.views.hr_application_remove',
                            name="auth_hrapplication_remove"),
@@ -129,11 +130,21 @@ urlpatterns = patterns('',
                            name='auth_deactivate_teamspeak3'),
                        url(r'reset_teamspeak3_perm/$', 'services.views.reset_teamspeak3_perm',
                            name='auth_reset_teamspeak3_perm'),
+                       url(r'verify_teamspeak3/$', 'services.views.verify_teamspeak3', name='auth_verify_teamspeak3'),
 
                        # Discord Service Control
                        url(r'^activate_discord/$', 'services.views.activate_discord', name='auth_activate_discord'),
                        url(r'^deactivate_discord/$', 'services.views.deactivate_discord', name='auth_deactivate_discord'),
                        url(r'^reset_discord/$', 'services.views.reset_discord', name='auth_reset_discord'),
+
+                       # IPS4 Service Control
+                       url(r'^activate_ips4/$', 'services.views.activate_ips4',
+                           name='auth_activate_ips4'),
+                       url(r'^deactivate_ips4/$', 'services.views.deactivate_ips4',
+                           name='auth_deactivate_ips4'),
+                       url(r'^reset_ips4_password/$', 'services.views.reset_ips4_password',
+                           name='auth_reset_ips4_password'),
+                       url(r'^set_ips4_password/$', 'services.views.set_ips4_password', name='auth_set_ips4_password'),
 
                        # Tools
                        url(r'^tool/fleet_formatter_tool/$', 'services.views.fleet_formatter_view',
@@ -150,7 +161,9 @@ urlpatterns = patterns('',
                        url(r'^srp_all/$', 'srp.views.srp_management_all', name='auth_srp_management_all_view'),
                        url(r'^srp_fleet_view/(\w+)$', 'srp.views.srp_fleet_view', name='auth_srp_fleet_view'),
                        url(r'^srp_fleet_add_view/$', 'srp.views.srp_fleet_add_view', name='auth_srp_fleet_add_view'),
-                       url(r'^srp_fleet_remove/(\w+)$', 'srp.views.srp_fleet_remove', name='auth_srp_flet_remove'),
+                       url(r'^srp_fleet_remove/(\w+)$', 'srp.views.srp_fleet_remove', name='auth_srp_fleet_remove'),
+                       url(r'^srp_fleet_disable/(\w+)$', 'srp.views.srp_fleet_disable', name='auth_srp_fleet_disable'),
+                       url(r'^srp_fleet_enable/(\w+)$', 'srp.views.srp_fleet_enable', name='auth_srp_fleet_enable'),
                        url(r'^srp_fleet_edit/(\w+)$', 'srp.views.srp_fleet_edit_view', name='auth_srp_fleet_edit_view'),
                        url(r'^srp_fleet_mark_completed/(\w+)', 'srp.views.srp_fleet_mark_completed',
                            name='auth_srp_fleet_mark_completed'),
@@ -166,7 +179,7 @@ urlpatterns = patterns('',
                            name="auth_srp_request_update_amount_view"),
 
                        #corputils
-                       url(r'^corputils/$', 'corputils.views.corp_member_view', name='auth_corp_member_view'),
+                       url(r'^corputils/$', 'corputils.views.corp_member_view', name='auth_corputils'),
                        url(r'^corputils/(?P<corpid>[0-9]+)/$', 'corputils.views.corp_member_view'),
                        url(r'^corputils/search/$', 'corputils.views.corputils_search', name="auth_corputils_search"),
                        url(r'^corputils/search/(?P<corpid>[0-9]+)/$', 'corputils.views.corputils_search'),
@@ -189,6 +202,8 @@ urlpatterns = patterns('',
                        # Notifications
                        url(r'^notifications/$', 'notifications.views.notification_list', name='auth_notification_list'),
                        url(r'^notifications/(\w+)/$', 'notifications.views.notification_view', name='auth_notification_view'),
+                       url(r'^remove_notifications/(\w+)/$', 'notifications.views.remove_notification', name='auth_remove_notification'),
+)
 
                        # FleetActivityTracking (FAT)
                        url(r'^fat/$', 'fleetactivitytracking.views.fatlink_view', name='auth_fatlink_view'),

@@ -100,14 +100,15 @@ DATABASES = {
         'PORT': os.environ.get('AA_DB_PHPBB3_PORT', '3306'),
     },
 
-    'mumble': {
+    'ips4': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'alliance_mumble',
-        'USER': os.environ.get('AA_DB_MUMBLE_USER', 'allianceserver'),
-        'PASSWORD': os.environ.get('AA_DB_MUMBLE_PASSWORD', 'password'),
-        'HOST': os.environ.get('AA_DB_MUMBLE_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('AA_DB_MUMBLE_PORT', '3306'),
+        'NAME': 'alliance_ips4',
+        'USER': os.environ.get('AA_DB_IPS4_USER', 'allianceserver'),
+        'PASSWORD': os.environ.get('AA_DB_IPS4_PASSWORD', 'password'),
+        'HOST': os.environ.get('AA_DB_IPS4_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('AA_DB_IPS4_PORT', '3306'),
     }
+    
 }
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -132,13 +133,13 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 TEMPLATE_DIRS = (
-    'customization/templates',
-    'stock/templates',
+    os.path.join(BASE_DIR, 'customization/templates'),
+    os.path.join(BASE_DIR, 'stock/templates'),
 )
 
 STATICFILES_DIRS = (
-    'customization/static',
-    'stock/static',
+    os.path.join(BASE_DIR, "customization/static"),
+    os.path.join(BASE_DIR, "stock/static"),
 )
 
 LOGIN_URL = '/login_user/'
@@ -189,7 +190,7 @@ IS_CORP = 'True' == os.environ.get('AA_IS_CORP', 'True')
 # DOMAIN - The alliance auth domain_url
 # EMAIL_HOST - SMTP Server URL
 # EMAIL_PORT - SMTP Server PORT
-# EMAIL_HOST_USER - Email Username (for gmail, the part before @gmail.com)
+# EMAIL_HOST_USER - Email Username (for gmail, the entire address)
 # EMAIL_HOST_PASSWORD - Email Password
 # EMAIL_USE_TLS - Set to use TLS encryption
 #################
@@ -222,7 +223,9 @@ FORUM_URL = os.environ.get('AA_FORUM_URL', '')
 DEFAULT_AUTH_GROUP = os.environ.get('AA_DEFAULT_ALLIANCE_GROUP', 'Member')
 DEFAULT_BLUE_GROUP = os.environ.get('AA_DEFAULT_BLUE_GROUP', 'Blue')
 MEMBER_CORP_GROUPS = 'True' == os.environ.get('AA_MEMBER_CORP_GROUPS', 'True')
+MEMBER_ALLIANCE_GROUPS = 'True' == os.environ.get('AA_MEMBER_ALLIANCE_GROUPS', 'False')
 BLUE_CORP_GROUPS = 'True' == os.environ.get('AA_BLUE_CORP_GROUPS', 'False')
+BLUE_ALLIANCE_GROUPS = 'True' == os.environ.get('AA_BLUE_ALLIANCE_GROUPS', 'False')
 
 #########################
 # Alliance Service Setup
@@ -232,6 +235,7 @@ BLUE_CORP_GROUPS = 'True' == os.environ.get('AA_BLUE_CORP_GROUPS', 'False')
 # ENABLE_AUTH_MUMBLE - Enable mumble support in the auth for auth'd members
 # ENABLE_AUTH_IPBOARD - Enable IPBoard forum support in the auth for auth'd members
 # ENABLE_AUTH_DISCORD - Enable Discord support in the auth for auth'd members
+# ENABLE_AUTH_IPS4 - Enable IPS4 support in the auth for auth'd members
 #########################
 ENABLE_AUTH_FORUM = 'True' == os.environ.get('AA_ENABLE_AUTH_FORUM', 'False')
 ENABLE_AUTH_JABBER = 'True' == os.environ.get('AA_ENABLE_AUTH_JABBER', 'False')
@@ -239,6 +243,7 @@ ENABLE_AUTH_MUMBLE = 'True' == os.environ.get('AA_ENABLE_AUTH_MUMBLE', 'False')
 ENABLE_AUTH_IPBOARD = 'True' == os.environ.get('AA_ENABLE_AUTH_IPBOARD', 'False')
 ENABLE_AUTH_TEAMSPEAK3 = 'True' == os.environ.get('AA_ENABLE_AUTH_TEAMSPEAK3', 'False')
 ENABLE_AUTH_DISCORD = 'True' == os.environ.get('AA_ENABLE_AUTH_DISCORD', 'False')
+ENABLE_AUTH_IPS4 = 'True' == os.environ.get('AA_ENABLE_AUTH_IPS4', 'False')
 
 #####################
 # Blue service Setup
@@ -249,6 +254,7 @@ ENABLE_AUTH_DISCORD = 'True' == os.environ.get('AA_ENABLE_AUTH_DISCORD', 'False'
 # ENABLE_BLUE_MUMBLE - Enable mumble support in the auth for blues
 # ENABLE_BLUE_IPBOARD - Enable IPBoard forum support in the auth for blues
 # ENABLE_BLUE_DISCORD - Enable Discord support in the auth for blues
+# ENABLE_BLUE_IPS4 - Enable IPS4 support in the auth for blues
 #####################
 BLUE_STANDING = float(os.environ.get('AA_BLUE_STANDING', '5.0'))
 ENABLE_BLUE_FORUM = 'True' == os.environ.get('AA_ENABLE_BLUE_FORUM', 'False')
@@ -257,6 +263,7 @@ ENABLE_BLUE_MUMBLE = 'True' == os.environ.get('AA_ENABLE_BLUE_MUMBLE', 'False')
 ENABLE_BLUE_IPBOARD = 'True' == os.environ.get('AA_ENABLE_BLUE_IPBOARD', 'False')
 ENABLE_BLUE_TEAMSPEAK3 = 'True' == os.environ.get('AA_ENABLE_BLUE_TEAMSPEAK3', 'False')
 ENABLE_BLUE_DISCORD = 'True' == os.environ.get('AA_ENABLE_BLUE_DISCORD', 'False')
+ENABLE_BLUE_IPS4 = 'True' == os.environ.get('AA_ENABLE_BLUE_IPS4', 'False')
 
 #########################
 # Corp Configuration
@@ -374,6 +381,15 @@ DISCORD_USER_EMAIL = os.environ.get('AA_DISCORD_USER_EMAIL', '')
 DISCORD_USER_PASSWORD = os.environ.get('AA_DISCORD_USER_PASSWORD', '')
 
 #####################################
+# IPS4 Configuration
+#####################################
+# IPS4_URL - base url of the IPS4 install (no trailing slash)
+# IPS4_API_KEY - API key provided by IPS4
+#####################################
+IPS4_URL = os.environ.get('AA_IPS4_URL', 'http://mydomain.com/ips4')
+IPS4_API_KEY = os.environ.get('AA_IPS4_API_KEY', '')
+
+#####################################
 # Logging Configuration
 #####################################
 # Set log_file and console level to desired state:
@@ -402,7 +418,7 @@ LOGGING = {
         'log_file': {
             'level': 'INFO',         # edit this line to change logging level to file
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR,'allianceauth.log'),
+            'filename': os.path.join(BASE_DIR,'log/allianceauth.log'),
             'formatter': 'verbose',
             'maxBytes': 1024*1024*5, # edit this line to change max log file size
             'backupCount': 5,        # edit this line to change number of log backups
