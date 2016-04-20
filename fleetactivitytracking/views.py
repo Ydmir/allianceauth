@@ -13,9 +13,7 @@ from eveonline.models import EveCorporationInfo
 from eveonline.managers import EveManager
 from util import check_if_user_has_permission
 from forms import FatlinkForm
-from models import Fatlink
-from models import VipFat
-from models import Fat
+from models import Fatlink, VipFat, Fat
 
 from slugify import slugify
 
@@ -29,6 +27,25 @@ import datetime
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+class CorpStat(object):
+    def __init__(self, corp_id):
+        self.corp = EveCorporationInfo.objects.get(corporation_id=corp_id)
+        self.n_fats = 0
+
+def first_day_of_next_month(year, month):
+    if month == 12:
+        return datetime.datetime(year+1,1,1)
+    else:
+        return datetime.datetime(year, month+1, 1)
+
+def first_day_of_previous_month(year, month):
+    if month == 1:
+        return datetime.datetime(year-1,12,1)
+    else:
+        return datetime.datetime(year, month-1, 1)
+
 
 @login_required
 def fatlink_view(request):
@@ -48,23 +65,6 @@ def fatlink_view(request):
         context = {'user':user, 'fats': latest_fats}
 
     return render_to_response('registered/fatlinkview.html', context, context_instance=RequestContext(request))
-
-class CorpStat(object):
-    def __init__(self, corp_id):
-        self.corp = EveCorporationInfo.objects.get(corporation_id=corp_id)
-        self.n_fats = 0
-
-def first_day_of_next_month(year, month):
-    if month == 12:
-        return datetime.datetime(year+1,1,1)
-    else:
-        return datetime.datetime(year, month+1, 1)
-
-def first_day_of_previous_month(year, month):
-    if month == 1:
-        return datetime.datetime(year-1,12,1)
-    else:
-        return datetime.datetime(year, month-1, 1)
 
 
 @login_required
