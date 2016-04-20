@@ -99,6 +99,32 @@ def fatlink_statistics_view(request, year=datetime.date.today().year, month=date
     return render_to_response('registered/fatlinkstatisticsview.html', context, context_instance=RequestContext(request))
 
 
+
+@login_required
+def fatlink_personal_statistics_view(request, year=datetime.date.today().year):
+    year = int(year)
+    user = request.user
+    logger.debug("fatlink_personal_statistics_view called by user %s" % request.user)
+
+    personal_fats = Fat.objects.filter(user=user).order_by('id')
+
+
+
+    monthlystats = {datetime.date(year, month, 1).strftime("%h"):0 for month in range(1,13)}
+
+    for fat in personal_fats:
+        fatdate = fat.fatlink.fatdatetime
+        if fatdate.year == year:
+            monthlystats[fatdate.strftime("%h")] += 1
+
+    if datetime.datetime.now() > datetime.datetime(year+1, 1, 1):
+        context = {'user':user, 'monthlystats': monthlystats, 'year':year, 'previous_year':year-1, 'next_year':year+1}
+    else:
+        context = {'user':user, 'monthlystats': monthlystats, 'year':year, 'previous_year':year-1}
+
+    return render_to_response('registered/fatlinkpersonalstatisticsview.html', context, context_instance=RequestContext(request))
+
+
 @login_required
 def click_fatlink_view(request, hash, fatname):
     # Take IG-header data and register the fatlink if not existing already.
