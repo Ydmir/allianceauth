@@ -35,16 +35,3 @@ class Fat(models.Model):
     def __str__(self):
         output = "Fat-link for %s" % self.character.character_name
         return output.encode('utf-8')
-
-
-class VipFat(models.Model):
-    character = models.ForeignKey(EveCharacter, on_delete=models.CASCADE)
-    fatlink = models.ForeignKey(Fatlink)
-    # user?
-
-    class Meta:
-        unique_together = (('character', 'fatlink'),)
-
-    def __str__(self):
-        output = "VIP fat-link for %s" % self.character.character_name
-        return output.encode('utf-8')

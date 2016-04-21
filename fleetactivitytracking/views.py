@@ -4,7 +4,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from django.template import RequestContext
-from django.http import HttpResponseBadRequest
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
@@ -13,11 +12,11 @@ from eveonline.models import EveCorporationInfo
 from eveonline.managers import EveManager
 from util import check_if_user_has_permission
 from forms import FatlinkForm
-from models import Fatlink, VipFat, Fat
+from models import Fatlink, Fat
 
 from slugify import slugify
 
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 
 import string
 import random
@@ -52,7 +51,6 @@ def fatlink_view(request):
     # Will show the last 5 or so fatlinks clicked by user.
     # If the user has the right privileges the site will also show the latest fatlinks with the options to add VIPs and
     # manually add players.
-    #TODO: ADd functionality to step further back in the fat-history. See clicked fatlinks by month for example.
     user = request.user
     logger.debug("fatlink_view called by user %s" % request.user)
 
@@ -95,7 +93,6 @@ def fatlink_statistics_view(request, year=datetime.date.today().year, month=date
     else:
         context = {'fatStats':fatStatsList, 'month':start_of_month.strftime("%B"), 'year':year, 'previous_month': start_of_previous_month}
 
-    #TODO: Some fancy statistics. Fats per corp. Fats/active member. Fats/Character. Other metrics. Run in background tasks.
     return render_to_response('registered/fatlinkstatisticsview.html', context, context_instance=RequestContext(request))
 
 
@@ -131,7 +128,6 @@ def click_fatlink_view(request, hash, fatname):
     # use obj, created = Fat.objects.get_or_create()
     # onload="CCPEVE.requestTrust('http://www.mywebsite.com')"
 
-    # TODO: Probably a check for if we are using the IGB at all should be performed..
     if 'HTTP_EVE_TRUSTED' in request.META and request.META['HTTP_EVE_TRUSTED'] == "Yes":
         # Retrieve the latest fatlink using the hash.
         try:
@@ -178,13 +174,8 @@ def create_fatlink_view(request):
     logger.debug("create_fatlink_view called by user %s" % request.user)
     if request.method == 'POST':
         logger.debug("Post request to create_fatlink_view by user %s" % request.user)
-        form = FatlinkForm(request.POST, extra=request.POST.get('vip_count'))
-        if 'add_extra_vip' in request.POST:
-            if form.is_valid():
-                form.vip_count = int(form.cleaned_data["vip_count"])+1
-            else:
-                form = FatlinkForm()
-        elif 'submit_fat' in request.POST:
+        form = FatlinkForm(request.POST)
+        if 'submit_fat' in request.POST:
             logger.debug("Submitting fleetactivitytracking by user %s" % request.user)
             if form.is_valid():
                 fatlink = Fatlink()
@@ -203,12 +194,6 @@ def create_fatlink_view(request):
                         messages.append(message[0].decode())
                     context = {'form': form, 'errormessages': messages}
                     return render_to_response('registered/fatlinkformatter.html', context, context_instance=RequestContext(request))
-
-                for vipnr in range(int(form.cleaned_data["vip_count"])):
-                    vipfat = VipFat()
-                    vipfat.character = form.cleaned_data["vip_%s" % vipnr]
-                    vipfat.fatlink = fatlink
-                    vipfat.save()
             else:
                 form = FatlinkForm()
                 context = {'form': form, 'badrequest': True}
