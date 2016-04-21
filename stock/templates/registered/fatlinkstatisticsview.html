@@ -22,18 +22,22 @@
         <table class="table table-responsive table-bordered">
             <tr>
                 <th class="col-md-1"></th>
+                <th class="col-md-2 text-center">Ticker</th>
                 <th class="col-md-5 text-center">Corp</th>
                 <th class="col-md-2 text-center">Members</th>
                 <th class="col-md-2 text-center">Fats</th>
+                <th class="col-md-2 text-center">Average fats</th>
             </tr>
             {% for corpStat in fatStats %}
             <tr>
                 <td>
                     <img src="https://image.eveonline.com/Corporation/{{ corpStat.corp.corporation_id }}_32.png" class="ra-avatar img-responsive">
                 </td>
+                <td class="text-center">[{{ corpStat.corp.corporation_ticker }}]</td>
                 <td class="text-center">{{ corpStat.corp.corporation_name }}</td>
                 <td class="text-center">{{ corpStat.corp.member_count }}</td>
                 <td class="text-center">{{ corpStat.n_fats }}</td>
+                <td class="text-center">{{ corpStat.avg_fat }}</td>
             </tr>
             {% endfor %}
         </table>

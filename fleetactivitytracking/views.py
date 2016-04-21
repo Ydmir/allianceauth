@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.core.exceptions import ObjectDoesNotExist
@@ -29,9 +30,16 @@ logger = logging.getLogger(__name__)
 
 
 class CorpStat(object):
-    def __init__(self, corp_id):
-        self.corp = EveCorporationInfo.objects.get(corporation_id=corp_id)
+    def __init__(self, corp_id, corp=None, blue=False):
+        if corp:
+            self.corp = corp
+        else:
+           self.corp = EveCorporationInfo.objects.get(corporation_id=corp_id)
         self.n_fats = 0
+        self.blue = blue
+
+    def avg_fat(self):
+        return "%.2f" % (float(self.n_fats)/float(self.corp.member_count))
 
 def first_day_of_next_month(year, month):
     if month == 12:
@@ -76,17 +84,25 @@ def fatlink_statistics_view(request, year=datetime.date.today().year, month=date
 
     fatStats = OrderedDict()
 
+    if settings.IS_CORP:
+        fatStats[settings.CORP_NAME] = CorpStat(settings.CORP_ID)
+    else:
+        alliance_corps = EveCorporationInfo.objects.filter(alliance__alliance_id=settings.ALLIANCE_ID)
+        for corp in alliance_corps:
+            fatStats[corp.corporation_name] = CorpStat(corp.corporation_id, corp=corp)
+
     fatlinks_in_span = Fatlink.objects.filter(fatdatetime__gte = start_of_month).filter(fatdatetime__lt = start_of_next_month)
 
     for fatlink in fatlinks_in_span:
         fats_in_fatlink = Fat.objects.filter(fatlink=fatlink)
         for fat in fats_in_fatlink:
             fatStats.setdefault(fat.character.corporation_name,
-                                CorpStat(fat.character.corporation_id)
+                                CorpStat(fat.character.corporation_id, blue=True)
                                 ).n_fats += 1
 
     fatStatsList = [fatStat for corp_name, fatStat in fatStats.items()]
-    fatStatsList.sort(key=lambda stat: stat.n_fats)
+    fatStatsList.sort(key=lambda stat: stat.corp.corporation_name)
+    fatStatsList.sort(key=lambda stat: (stat.n_fats, stat.n_fats/stat.corp.member_count), reverse=True)
 
     if datetime.datetime.now() > start_of_next_month:
         context = {'fatStats':fatStatsList, 'month':start_of_month.strftime("%B"), 'year':year, 'previous_month': start_of_previous_month,'next_month': start_of_next_month}
