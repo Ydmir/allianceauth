@@ -2,7 +2,6 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import permission_required
 from django.shortcuts import HttpResponseRedirect
 
 from collections import namedtuple
@@ -15,7 +14,6 @@ from eveonline.models import EveAllianceInfo
 from eveonline.models import EveCharacter
 from eveonline.models import EveApiKeyPair
 from fleetactivitytracking.models import Fat
-from authentication.models import AuthServicesInfo
 from util import check_if_user_has_permission
 from forms import CorputilsSearchForm
 from evelink.api import APIError
@@ -87,7 +85,6 @@ def corp_member_view(request, corpid = None, year=datetime.date.today().year, mo
             corpid = membercorplist[0][0]
 
     corp = EveCorporationInfo.objects.get(corporation_id=corpid)
-    #Player = namedtuple("Player", ["main", "user", "maincorp", "maincorpid", "altlist", "apilist", "n_fats"])
 
     if check_if_user_has_permission(request.user, 'alliance_apis') or (check_if_user_has_permission(request.user, 'corp_apis') and (user_corp_id == corpid)):
         logger.debug("Retreiving and sending API-information")
