@@ -41,6 +41,26 @@
             </tr>
             {% endfor %}
         </table>
+
+        <h2>VIP top list</h2>
+        <table class="table table-responsive table-bordered">
+            <tr>
+                <th class="col-md-1"></th>
+                <th class="col-md-3 text-center">Character</th>
+                <th class="col-md-3 text-center">Corp</th>
+                <th class="col-md-2 text-center">Vip count</th>
+            </tr>
+            {% for vip_stat in vip_list %}
+            <tr>
+                <td>
+                    <img src="https://image.eveonline.com/Character/{{ vip_stat.character.character_id }}_64.jpg" class="ra-avatar img-circle">
+                </td>
+                <td class="text-center">[{{ vip_stat.character.character_name}}]</td>
+                <td class="text-center">{{ vip_stat.character.corporation_name }}</td>
+                <td class="text-center">{{ vip_stat.vip_count }}</td>
+            </tr>
+            {% endfor %}
+        </table>
     </div>
 
 

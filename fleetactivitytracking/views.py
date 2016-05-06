@@ -41,6 +41,11 @@ class CorpStat(object):
     def avg_fat(self):
         return "%.2f" % (float(self.n_fats)/float(self.corp.member_count))
 
+class VipStat(object):
+    def __init__(self, character):
+        self.character = character
+        self.vip_count = 0
+
 def first_day_of_next_month(year, month):
     if month == 12:
         return datetime.datetime(year+1,1,1)
@@ -93,21 +98,27 @@ def fatlink_statistics_view(request, year=datetime.date.today().year, month=date
 
     fatlinks_in_span = Fatlink.objects.filter(fatdatetime__gte = start_of_month).filter(fatdatetime__lt = start_of_next_month)
 
+    vip_statistics = dict()
+
     for fatlink in fatlinks_in_span:
         fats_in_fatlink = Fat.objects.filter(fatlink=fatlink)
         for fat in fats_in_fatlink:
             fatStats.setdefault(fat.character.corporation_name,
                                 CorpStat(fat.character.corporation_id, blue=True)
                                 ).n_fats += 1
+            if fat.vip:
+                vip_statistics.setdefault(fat.character.character_id, VipStat(fat.character)).vip_count += 1
+
+    vip_list = sorted([item for key, item in vip_statistics.items()], key=lambda x: x.vip_count, reverse=True)
 
     fatStatsList = [fatStat for corp_name, fatStat in fatStats.items()]
     fatStatsList.sort(key=lambda stat: stat.corp.corporation_name)
     fatStatsList.sort(key=lambda stat: (stat.n_fats, stat.n_fats/stat.corp.member_count), reverse=True)
 
+    context = {'fatStats':fatStatsList, 'month':start_of_month.strftime("%B"), 'year':year,
+               'previous_month': start_of_previous_month, 'vip_list': vip_list}
     if datetime.datetime.now() > start_of_next_month:
-        context = {'fatStats':fatStatsList, 'month':start_of_month.strftime("%B"), 'year':year, 'previous_month': start_of_previous_month,'next_month': start_of_next_month}
-    else:
-        context = {'fatStats':fatStatsList, 'month':start_of_month.strftime("%B"), 'year':year, 'previous_month': start_of_previous_month}
+        context['next_month'] = start_of_next_month
 
     return render_to_response('registered/fatlinkstatisticsview.html', context, context_instance=RequestContext(request))
 
