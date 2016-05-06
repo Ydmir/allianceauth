@@ -13,4 +13,4 @@ def get_fleet_list():
 class FatlinkForm(forms.Form):
     fatname = forms.CharField(label='Name of fat-link', required=True)
     duration = forms.IntegerField(label="Duration of fat-link", required=True, initial=30, min_value=1, max_value=2147483647)
-    fleet = forms.ModelChoiceField(label="Fleet", queryset=optimer.objects.all().order_by('operation_name'))
+    fleet = forms.ModelChoiceField(label="Operation", queryset=optimer.objects.all().order_by('operation_name'), empty_label="No operation", required=False)

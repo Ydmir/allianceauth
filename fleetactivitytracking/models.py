@@ -27,6 +27,7 @@ class Fat(models.Model):
     system = models.CharField(max_length=30)
     shiptype = models.CharField(max_length=30)
     station = models.CharField(max_length=125)
+    vip = models.BooleanField(default=False)
     user = models.ForeignKey(User)
 
     class Meta:

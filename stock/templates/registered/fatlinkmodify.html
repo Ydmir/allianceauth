@@ -24,7 +24,8 @@
                 <th class="text-center">System</th>
                 <th class="text-center">Ship</th>
                 <th class="text-center">Eve Time</th>
-                <th></th>
+                <th class="text-center">Toggle VIP</th>
+                <th class="text-center">Delete</th>
             </tr>
             {% for fat in registered_fats %}
             <tr>
@@ -39,7 +40,18 @@
                 <td class="text-center">{{ fat.fatlink.fatdatetime }}</td>
                 <td class="text-center">
                     <form>
-                        <button type="submit" class="btn btn-warning" name="removechar" value="{{ fat.character.character_id }}"><span
+                        <button type="submit" class="btn {% if fat.vip %} btn-info {% else %} btn-default {% endif %}" name="toggle_vip" value="{{ fat.character.character_id }}">
+                            {% if fat.vip %} VIP
+                            {% else %}
+                                <span
+                                class="glyphicon  glyphicon-eject "></span>
+                            {% endif %}
+                        </button>
+                    </form>
+                </td>
+                <td class="text-center">
+                    <form>
+                        <button type="submit" class="btn btn-danger" name="removechar" value="{{ fat.character.character_id }}"><span
                                 class="glyphicon glyphicon-remove"></span></button>
                     </form>
                 </td>

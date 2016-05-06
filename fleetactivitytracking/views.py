@@ -233,7 +233,10 @@ def create_fatlink_view(request):
             if form.is_valid():
                 fatlink = Fatlink()
                 fatlink.name = slugify(form.cleaned_data["fatname"])
-                fatlink.fleet = form.cleaned_data["fleet"]
+                if form.cleaned_data["fleet"]:
+                    fatlink.fleet = form.cleaned_data["fleet"]
+                else:
+                    fatlink.fleet = "No Operation"
                 fatlink.duration = form.cleaned_data["duration"]
                 fatlink.fatdatetime = timezone.now()
                 fatlink.creator = request.user
@@ -275,12 +278,21 @@ def modify_fatlink_view(request, hash=""):
     if(request.GET.get('removechar')):
         character_id = request.GET.get('removechar')
         character = EveCharacter.objects.get(character_id=character_id)
-        logger.debug("Removing character %s from fleetactivitytracking  %s" % (character.character_name ,fatlink.name))
+        logger.debug("Removing character %s from fatlink  %s" % (character.character_name ,fatlink.name))
 
         Fat.objects.filter(fatlink=fatlink).filter(character=character).delete()
 
+    if(request.GET.get('toggle_vip')):
+        character_id = request.GET.get('toggle_vip')
+        character = EveCharacter.objects.get(character_id=character_id)
+        logger.debug("Toggling vip status of character %s for link %s" % (character.character_name ,fatlink.name))
+
+        fat = Fat.objects.filter(fatlink=fatlink).filter(character=character)[0]
+        fat.vip ^= True
+        fat.save()
+
     if(request.GET.get('deletefat')):
-        logger.debug("Removing fleetactivitytracking  %s" % fatlink.name)
+        logger.debug("Removing fatlink  %s" % fatlink.name)
         fatlink.delete()
         return HttpResponseRedirect('/fat/')
 
